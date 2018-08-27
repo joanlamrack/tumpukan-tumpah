@@ -1,0 +1,42 @@
+{
+  "name": "golb-blog",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "chai": "^4.1.2",
+    "chai-http": "^4.0.0",
+    "chai-match": "^1.1.1",
+    "cors": "^2.8.4",
+    "dotenv": "^6.0.0",
+    "express": "^4.16.3",
+    "jsonwebtoken": "^8.3.0",
+    "mongoose": "^5.2.9",
+    "morgan": "^1.9.0"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test mocha",
+	"start": "NODE_ENV=production node app.js",
+	"dev": "NODE_ENV=development node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+github.com:joanlamrack/tumpukan-tumpah.git"
+  },
+  "keywords": [
+    "mocha"
+  ],
+  "author": "joanlamrack",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joanlamrack/tumpukan-tumpah/issues"
+  },
+  "homepage": "https://github.com/joanlamrack/tumpukan-tumpah#readme"
+}
