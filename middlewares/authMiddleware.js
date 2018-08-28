@@ -41,8 +41,29 @@ class AuthMiddleware {
 		}
 	}
 
-	static isOwnedByUser(req,res,next){
-		
+	static isOwnedByUser(req, res, next) {
+		User.aggregate([
+			{
+				$or: [
+					{ $and: { id: req.headers.userId, comments: req.params.commentId } },
+					{ $and: { id: req.headers.userId, threads: req.params.threadId } }
+				]
+			}
+		])
+
+			.then(userFound => {
+				if (userFound.length) {
+					console.log(userFound);
+					next();
+				} else {
+					res.status(406).json({
+						error: "forbidden"
+					});
+				}
+			})
+			.catch(err => {
+				console.log(err);
+			});
 	}
 }
 

@@ -10,33 +10,30 @@ const options = {
 	}
 };
 
-let ThreadModelByDiscriminator = PostModel.discriminator(
-	"Thread",
-	new Schema(
-		{
-			tags: [
-				{
-					type: String,
-					required: true
-				}
-			],
-			title: {
+let threadSchema = new Schema(
+	{
+		tags: [
+			{
 				type: String,
 				required: true
-			},
-			comments: [
-				{
-					type: Schema.Types.ObjectId,
-					ref: "Comment",
-					required: true
-				}
-			]
+			}
+		],
+		title: {
+			type: String,
+			required: true
 		},
-		options
-	)
+		comments: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: "Comment",
+				required: true
+			}
+		]
+	},
+	options
 );
 
-ThreadModelByDiscriminator.pre("remove", function(next) {
+threadSchema.pre("remove", function(next) {
 	let thread = this;
 	thread
 		.model("Comment")
@@ -60,5 +57,10 @@ ThreadModelByDiscriminator.pre("remove", function(next) {
 			console.log(err);
 		});
 });
+
+let ThreadModelByDiscriminator = PostModel.discriminator(
+	"Thread",
+	threadSchema
+);
 
 module.exports = ThreadModelByDiscriminator;

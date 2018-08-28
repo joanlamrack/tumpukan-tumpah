@@ -1,20 +1,19 @@
 const router = require("express").Router();
+const CommentController = require("../controllers/commentController");
 const AuthMiddleware = require("../middlewares/authMiddleware");
 
 //Comments
 
-router.route("/").post(function(req, res) {}); // create Comment with threadId on headers, and user token
+router.route("/").post(CommentController.createComment); // create Comment with threadId on headers, and user token
 
-router.post(":/commentId/upvote", function(req, res) {}); // upvote a thread, make sure user is logged in and the thread has been not been voted?
-router.post(":/commentId/downvote", function(req, res) {}); //downvote a thread
+router.post(":/commentId/upvote", CommentController.upvoteCommentById); // upvote a thread, make sure user is logged in and the thread has been not been voted?
+router.post(":/commentId/downvote", CommentController.downvoteCommentById); //downvote a thread
 
 router
 	.route("/:commentId")
-	.get(function(req, res) {}) // get comment
-	.patch(function(req, res) {}); // edit comment with user token
+	.get(CommentController.getCommentById) // get comment
+	.patch(CommentController.patchCommentById); // edit comment with user token
 
-router.get("/me", function(req, res) {});
-
-
+router.get("/me", CommentController.getCommentByUserId);
 
 module.exports = router;

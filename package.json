@@ -29,7 +29,7 @@
   "scripts": {
     "test": "NODE_ENV=test mocha",
     "start": "NODE_ENV=production node app.js",
-    "dev": "NODE_ENV=development node app.js"
+    "dev": "NODE_ENV=production nodemon app.js"
   },
   "repository": {
     "type": "git",

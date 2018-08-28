@@ -10,21 +10,18 @@ const options = {
 	}
 };
 
-let CommentModelByDiscriminator = PostModel.discriminator(
-	"Comment",
-	new Schema(
-		{
-			thread: {
-				type: Schema.Types.ObjectId,
-				ref: "Thread",
-				required: true
-			}
-		},
-		options
-	)
+let commentSchema = new Schema(
+	{
+		thread: {
+			type: Schema.Types.ObjectId,
+			ref: "Thread",
+			required: true
+		}
+	},
+	options
 );
 
-CommentModelByDiscriminator.pre("remove", function(next) {
+commentSchema.pre("remove", function(next) {
 	let comment = this;
 	comment
 		.model("User")
@@ -44,5 +41,10 @@ CommentModelByDiscriminator.pre("remove", function(next) {
 			console.log(err);
 		});
 });
+
+let CommentModelByDiscriminator = PostModel.discriminator(
+	"Comment",
+	commentSchema
+);
 
 module.exports = CommentModelByDiscriminator;
