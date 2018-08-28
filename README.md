@@ -19,6 +19,8 @@ A stackoverflow-like website Api Docs
 | /threads/:threadId |  GET |  | || 200 / 400 | get one thread with all comment and users
 | /threads/:threadId |  PATCH | token | title,content, tags || 200 / 400 | update thread by own user
 | /threads/:threadId |  DELETE | token | || 200 / 400 | delete the specified thread
+| /threads/:threadsId/upvote |  POST | token |  || 200 / 400 | upvote
+| /threads/:threadsId/downvote |  POST | token |  || 200 / 400 | downvote
 
 ## Routes for /comments
 

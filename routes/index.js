@@ -2,7 +2,6 @@ const router = require("express").Router();
 const threadRoute = require("./threads.js");
 const commentRoute = require("./comments.js");
 const UserController = require("../controllers/userControllers");
-const User = require("../models/users");
 
 router.use("/threads", threadRoute);
 router.use("/comments", commentRoute);

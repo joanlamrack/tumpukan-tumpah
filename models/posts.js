@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const ObjectIdHelper = require("../helpers/objectIdhelper");
 
 //PostSchema will serve Post and Thread as Base Schema
 
@@ -22,13 +23,13 @@ let PostSchema = new Schema(
 			type: String,
 			required: true
 		},
-		upvote: [
+		upvotes: [
 			{
 				type: Schema.Types.ObjectId,
 				ref: "User"
 			}
 		],
-		downvote: [
+		downvotes: [
 			{
 				type: Schema.Types.ObjectId,
 				ref: "User"
@@ -38,19 +39,37 @@ let PostSchema = new Schema(
 	baseSchemaOptions
 );
 
+PostSchema.methods.getUserOwnVote = function(userid) {
+	if (userid) {
+		for (let upvote of this.upvotes) {
+			if (ObjectIdHelper.convertObjectIdToStr(upvote) === userid) {
+				return "upvote";
+			}
+		}
+
+		for (let downvote of this.downvotes) {
+			if (ObjectIdHelper.convertObjectIdToStr(downvote) === userid) {
+				return "downvote";
+			}
+		}
+	}
+};
+
 PostSchema.methods.isAlreadyVoted = function(userid) {
 	//find if user is already in one of the upvotes / downvotes
-	this.upvote.forEach(upvoteByUser => {
-		if (upvoteByUser.id === userid || upvoteByUser === userid) {
-			return true;
+	if (userid) {
+		for (let upvote of this.upvotes) {
+			if (ObjectIdHelper.convertObjectIdToStr(upvote) === userid) {
+				return true;
+			}
 		}
-	});
 
-	this.downvote.forEach(downvoteByUser => {
-		if (downvoteByUser.id === userid || downvoteByUser === userid) {
-			return true;
+		for (let downvote of this.downvotes) {
+			if (ObjectIdHelper.convertObjectIdToStr(downvote) === userid) {
+				return true;
+			}
 		}
-	});
+	}
 
 	return false;
 };

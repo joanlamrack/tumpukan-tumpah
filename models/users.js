@@ -74,19 +74,23 @@ UserSchema.pre("remove", function(next) {
 	let user = this;
 	user
 		.model("Thread")
-		.aggregate([{ $match: { user: user._id } }])
+		.find({ user: user._id })
 		.then(threadsByUser => {
 			if (threadsByUser.length) {
 				for (let thread of threadsByUser) {
-					thread.remove();
+					thread.remove(function(err) {
+						console.log(err);
+					});
 				}
 			}
-			return user.model("Comment").aggregate([{ $match: { user: user._id } }]);
+			return user.model("Comment").find({ user: user._id });
 		})
 		.then(commentsByUser => {
 			if (commentsByUser.length) {
 				for (let comment of commentsByUser) {
-					comment.remove();
+					comment.remove(function(err) {
+						console.log(err);
+					});
 				}
 			}
 			next();

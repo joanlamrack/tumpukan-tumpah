@@ -1,13 +1,13 @@
 const Comment = require("../models/comments");
 let { responseErrorHandler } = require("../helpers/errorhandler");
-
+const ObjectIdHelper = require("../helpers/objectIdhelper");
 class CommentController {
 	constructor() {}
 
 	static createComment(req, res) {
 		Comment.create({
 			content: req.body.content,
-			thread: req.query.threadId,
+			Comment: req.query.CommentId,
 			user: req.headers.userId
 		})
 			.then(createdUser => {
@@ -19,10 +19,12 @@ class CommentController {
 	}
 
 	static getCommentById(req, res) {
-		Comment.aggregate([{ $match: { id: req.params.commentId } }])
+		Comment.findOne({
+			_id: ObjectIdHelper.convertStringIntoObjId(req.params.commentId)
+		})
 			.then(commentFound => {
-				if (commentFound.length) {
-					res.status(200).json(commentFound[0]);
+				if (Object.keys(commentFound).length) {
+					res.status(200).json(commentFound);
 				} else {
 					res.status(404).json({
 						error: "not found"
@@ -35,7 +37,9 @@ class CommentController {
 	}
 
 	static getCommentByUserId(req, res) {
-		Comment.aggregate([{ $match: { user: req.headers.userId } }])
+		Comment.find({
+			user: ObjectIdHelper.convertStringIntoObjId(req.header.userId)
+		})
 			.then(commentsByUser => {
 				res.status(200).json(commentsByUser);
 			})
@@ -45,11 +49,15 @@ class CommentController {
 	}
 
 	static deleteCommentById(req, res) {
-		Comment.aggregate([{ $match: { id: req.params.commentId } }])
+		Comment.findOne({
+			_id: ObjectIdHelper.convertStringIntoObjId(req.params.threadId)
+		})
 			.then(commentFound => {
-				if (commentFound.length) {
-					commentFound[0].remove();
-					res.status(200).json(commentFound[0]);
+				if (Object.keys(commentFound).length) {
+					commentFound.remove(function(err) {
+						console.log(err);
+						res.status(200).json(commentFound);
+					});
 				} else {
 					res.status(404).json({ error: "not found" });
 				}
@@ -76,11 +84,18 @@ class CommentController {
 	}
 
 	static upvoteCommentById(req, res) {
-		Comment.aggregate([{ $match: { id: req.params.commentId } }])
+		Comment.findOne({
+			_id: ObjectIdHelper.convertStringIntoObjId(req.params.commentId)
+		})
 			.then(commentToBeUpVoted => {
-				if (commentToBeUpVoted.length) {
+				if (
+					Object.keys(commentToBeUpVoted).length &&
+					!commentToBeUpVoted.isAlreadyVoted(req.headers.userId)
+				) {
 					return commentToBeUpVoted.update({
-						$push: { upvote: req.headers.userId }
+						$push: {
+							upvotes: ObjectIdHelper.convertStringIntoObjId(req.headers.userId)
+						}
 					});
 				} else {
 					res.status(404).json({
@@ -97,11 +112,16 @@ class CommentController {
 	}
 
 	static downvoteCommentById(req, res) {
-		Comment.aggregate([{ $match: { id: req.params.commentId } }])
+		Comment.findOne({
+			_id: ObjectIdHelper.convertStringIntoObjId(req.params.commentId)
+		})
 			.then(commentToBeUpVoted => {
-				if (commentToBeUpVoted.length) {
+				if (
+					Object.keys(commentToBeUpVoted).length &&
+					!commentToBeUpVoted.isAlreadyVoted(req.headers.userId)
+				) {
 					return commentToBeUpVoted.update({
-						$push: { downvote: req.headers.userId }
+						$push: { downvotes: req.headers.userId }
 					});
 				} else {
 					res.status(404).json({

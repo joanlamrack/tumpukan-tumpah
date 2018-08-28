@@ -25,20 +25,26 @@ class UserController {
 	static login(req, res) {
 		User.aggregate([{ $match: { email: req.body.email } }])
 			.then(userFound => {
-				let passwordisRight = AuthHelper.comparehash(
-					req.body.email + req.body.password,
-					userFound[0].password
-				);
-				if (userFound.length && passwordisRight) {
-					let token = AuthHelper.createToken({
-						id: ObjectIdHelper.extractIdStringFromObj(userFound[0])
-					});
-					res.status(200).json({
-						token: token
-					});
+				if (userFound.length) {
+					let passwordisRight = AuthHelper.comparehash(
+						req.body.email + req.body.password,
+						userFound[0].password
+					);
+					if (passwordisRight) {
+						let token = AuthHelper.createToken({
+							id: ObjectIdHelper.extractIdStringFromObj(userFound[0])
+						});
+						res.status(200).json({
+							token: token
+						});
+					} else {
+						res.status(404).json({
+							error: "Email or password wrong"
+						});
+					}
 				} else {
-					res.status(400).json({
-						error: "user not found"
+					res.status(404).json({
+						error: "Email or Password Wrong"
 					});
 				}
 			})
@@ -51,7 +57,6 @@ class UserController {
 
 	static forgotPassword(req, res) {
 		//Menerima email, kalau ada dalam database, email link reset password dikirim ke email
-		
 	}
 
 	static googleSignUp(req, res) {
@@ -60,7 +65,7 @@ class UserController {
 		let randomPassword = PassWordGenerator.generate();
 		req.body.password = randomPassword;
 		//Kirim email berisikan password
-		this.signup(req,res);
+		this.signup(req, res);
 	}
 }
 

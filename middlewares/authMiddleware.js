@@ -1,6 +1,6 @@
 const User = require("../models/users");
 const AuthHelper = require("../helpers/authhelper");
-
+const ObjectIdHelper = require("../helpers/objectIdhelper");
 class AuthMiddleware {
 	constructor() {}
 
@@ -35,25 +35,79 @@ class AuthMiddleware {
 					});
 				});
 		} catch (error) {
+			console.log(error);
 			res.status(400).json({
 				error: error.message
 			});
 		}
 	}
 
-	static isOwnedByUser(req, res, next) {
+	static isNotOwnedByUser(req, res, next) {
 		User.aggregate([
 			{
-				$or: [
-					{ $and: { id: req.headers.userId, comments: req.params.commentId } },
-					{ $and: { id: req.headers.userId, threads: req.params.threadId } }
-				]
+				$match: {
+					$and: [
+						{ _id: ObjectIdHelper.convertStringIntoObjId(req.headers.userId) },
+						{
+							$or: [
+								{
+									threads: ObjectIdHelper.convertStringIntoObjId(
+										req.params.threadId
+									)
+								},
+								{
+									comments: ObjectIdHelper.convertStringIntoObjId(
+										req.params.commentsId
+									)
+								}
+							]
+						}
+					]
+				}
 			}
 		])
 
 			.then(userFound => {
 				if (userFound.length) {
-					console.log(userFound);
+					res.status(406).json({
+						error: "forbidden"
+					});
+				} else {
+					next();
+				}
+			})
+			.catch(err => {
+				console.log(err);
+			});
+	}
+
+	static isOwnedByUser(req, res, next) {
+		User.aggregate([
+			{
+				$match: {
+					$and: [
+						{ _id: ObjectIdHelper.convertStringIntoObjId(req.headers.userId) },
+						{
+							$or: [
+								{
+									threads: ObjectIdHelper.convertStringIntoObjId(
+										req.params.threadId
+									)
+								},
+								{
+									comments: ObjectIdHelper.convertStringIntoObjId(
+										req.params.commentsId
+									)
+								}
+							]
+						}
+					]
+				}
+			}
+		])
+
+			.then(userFound => {
+				if (userFound.length) {
 					next();
 				} else {
 					res.status(406).json({

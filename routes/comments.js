@@ -4,16 +4,44 @@ const AuthMiddleware = require("../middlewares/authMiddleware");
 
 //Comments
 
-router.route("/").post(CommentController.createComment); // create Comment with threadId on headers, and user token
+router
+	.route("/")
+	.post(
+		AuthMiddleware.checkifTokenExist,
+		AuthMiddleware.checkifTokenValid,
+		CommentController.createComment
+	); // create Comment with threadId on headers, and user token
 
-router.post(":/commentId/upvote", CommentController.upvoteCommentById); // upvote a thread, make sure user is logged in and the thread has been not been voted?
-router.post(":/commentId/downvote", CommentController.downvoteCommentById); //downvote a thread
+router.post(
+	":/commentId/upvote",
+	AuthMiddleware.checkifTokenExist,
+	AuthMiddleware.checkifTokenValid,
+	AuthMiddleware.isNotOwnedByUser,
+	CommentController.upvoteCommentById
+); // upvote a thread, make sure user is logged in and the thread has been not been voted?
+router.post(
+	":/commentId/downvote",
+	AuthMiddleware.checkifTokenExist,
+	AuthMiddleware.checkifTokenValid,
+	AuthMiddleware.isNotOwnedByUser,
+	CommentController.downvoteCommentById
+); //downvote a thread
 
 router
 	.route("/:commentId")
 	.get(CommentController.getCommentById) // get comment
-	.patch(CommentController.patchCommentById); // edit comment with user token
+	.patch(
+		AuthMiddleware.checkifTokenExist,
+		AuthMiddleware.checkifTokenValid,
+		AuthMiddleware.isOwnedByUser,
+		CommentController.patchCommentById
+	); // edit comment with user token
 
-router.get("/me", CommentController.getCommentByUserId);
+router.get(
+	"/me",
+	AuthMiddleware.checkifTokenExist,
+	AuthMiddleware.checkifTokenValid,
+	CommentController.getCommentByUserId
+);
 
 module.exports = router;

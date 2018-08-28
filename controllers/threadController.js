@@ -1,6 +1,6 @@
 let Thread = require("../models/threads");
 let { responseErrorHandler } = require("../helpers/errorhandler");
-
+let ObjectIdHelper = require("../helpers/objectIdhelper");
 class ThreadController {
 	constructor() {}
 
@@ -8,7 +8,8 @@ class ThreadController {
 		Thread.create({
 			title: req.body.title,
 			content: req.body.content,
-			user: req.headers.userId
+			user: req.headers.userId,
+			tags: req.body.tags
 		})
 			.then(userCreated => {
 				res.status(200).json(userCreated);
@@ -19,7 +20,7 @@ class ThreadController {
 	}
 
 	static getAllThreads(req, res) {
-		Thread.aggregate([])
+		Thread.find({})
 			.populate("user")
 			.then(ThreadFound => {
 				res.status(200).json(ThreadFound);
@@ -30,14 +31,19 @@ class ThreadController {
 	}
 
 	static getThreadByid(req, res) {
-		Thread.aggregate([{ $match: { id: req.params.threadId } }])
+		Thread.findOne({
+			_id: ObjectIdHelper.convertStringIntoObjId(req.params.threadId)
+		})
 			.populate("user")
-			.populate({ path: "comments", populate: "user" })
+			.populate({
+				path: "comments",
+				populate: "user"
+			})
 			.then(threadsFound => {
-				if (threadsFound.length) {
-					res.status(200).json(threadsFound[0]);
+				if (Object.keys(threadsFound).length) {
+					res.status(200).json(threadsFound);
 				} else {
-					res.status(204);
+					res.status(404).json({ error: "Not Found" });
 				}
 			})
 			.catch(err => {
@@ -46,7 +52,9 @@ class ThreadController {
 	}
 
 	static getAllThreadsByUserId(req, res) {
-		Thread.aggregate([{ $match: { user: req.headers.userId } }])
+		Thread.find({
+			user: ObjectIdHelper.convertStringIntoObjId(req.headers.userId)
+		})
 			.then(threadsbyuser => {
 				res.status(200).json(threadsbyuser);
 			})
@@ -56,15 +64,20 @@ class ThreadController {
 	}
 
 	static deleteThreadById(req, res) {
-		Thread.aggregate([{ $match: { id: req.params.id } }])
+		Thread.findOne({
+			_id: ObjectIdHelper.convertStringIntoObjId(req.params.threadId)
+		})
 			.then(threadFound => {
-				if (threadFound.length) {
-					res.status(200).json(threadFound[0]);
-					threadFound[0].remove();
+				if (Object.keys(threadFound).length) {
+					threadFound.remove(function(err) {
+						console.log(err);
+						res.status(200).json(threadFound);
+					});
 				} else {
 					res.status(204);
 				}
 			})
+
 			.catch(err => {
 				responseErrorHandler(err, res);
 			});
@@ -85,11 +98,18 @@ class ThreadController {
 	}
 
 	static upvoteThreadById(req, res) {
-		Thread.aggregate([{ $match: { id: req.params.threadId } }])
+		Thread.findOne({
+			_id: ObjectIdHelper.convertStringIntoObjId(req.params.threadId)
+		})
 			.then(threadToBeUpVoted => {
-				if (threadToBeUpVoted.length) {
+				if (
+					Object.keys(threadToBeUpVoted).length &&
+					!threadToBeUpVoted.isAlreadyVoted(req.headers.userId)
+				) {
 					return threadToBeUpVoted.update({
-						$push: { upvote: req.headers.userId }
+						$push: {
+							upvotes: ObjectIdHelper.convertStringIntoObjId(req.headers.userId)
+						}
 					});
 				} else {
 					res.status(404).json({
@@ -106,11 +126,16 @@ class ThreadController {
 	}
 
 	static downvoteThreadById(req, res) {
-		Thread.aggregate([{ $match: { id: req.params.threadId } }])
+		Thread.findOne({
+			_id: ObjectIdHelper.convertStringIntoObjId(req.params.threadId)
+		})
 			.then(threadToBeUpVoted => {
-				if (threadToBeUpVoted.length) {
+				if (
+					Object.keys(threadToBeUpVoted).length &&
+					!threadToBeUpVoted.isAlreadyVoted(req.headers.userId)
+				) {
 					return threadToBeUpVoted.update({
-						$push: { downvote: req.headers.userId }
+						$push: { downvotes: req.headers.userId }
 					});
 				} else {
 					res.status(404).json({

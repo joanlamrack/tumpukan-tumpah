@@ -1,4 +1,4 @@
-exports.modules = {
+module.exports = {
 	responseErrorHandler: function(error, res) {
 		res.status(400).json(error);
 	},
