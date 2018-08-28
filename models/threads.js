@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const PostModel = require("./posts.js");
+
 const options = {
 	discriminatorKey: "posttype",
 	timestamps: {
@@ -26,7 +27,7 @@ let ThreadModelByDiscriminator = PostModel.discriminator(
 			comments: [
 				{
 					type: Schema.Types.ObjectId,
-					ref: "Thread",
+					ref: "Comment",
 					required: true
 				}
 			]
@@ -34,5 +35,30 @@ let ThreadModelByDiscriminator = PostModel.discriminator(
 		options
 	)
 );
+
+ThreadModelByDiscriminator.pre("remove", function(next) {
+	let thread = this;
+	thread
+		.model("Comment")
+		.aggregate([{ $match: { _id: { $in: thread.comments } } }])
+		.then(commentsInThread => {
+			if (commentsInThread.length) {
+				commentsInThread.forEach(comment => {
+					comment.remove();
+				});
+			}
+			return thread.model("User").aggregate([{ $match: { _id: thread.user } }]);
+		})
+		.then(UserWhoOwnedThread => {
+			return UserWhoOwnedThread.update({ $pull: { threads: thread.user } });
+		})
+		.then(userUpdateResponse => {
+			console.log(userUpdateResponse);
+			next();
+		})
+		.catch(err => {
+			console.log(err);
+		});
+});
 
 module.exports = ThreadModelByDiscriminator;

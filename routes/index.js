@@ -1,5 +1,10 @@
 const router = require("express").Router();
+const threadRoute = require("./threads.js");
+const commentRoute = require("./comments.js");
 const UserController = require("../controllers/userControllers");
+
+router.use("/threads", threadRoute);
+router.use("/comments", commentRoute);
 
 router.get("/", function(req, res) {
 	res.send("Well This works");

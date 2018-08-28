@@ -40,6 +40,10 @@ class AuthMiddleware {
 			});
 		}
 	}
+
+	static isOwnedByUser(req,res,next){
+		
+	}
 }
 
 module.exports = AuthMiddleware;

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Authhelper = require("../helpers/authhelper");
+const { responseErrorHandler } = require("../helpers/errorhandler.js");
 
 let UserSchema = new Schema(
 	{
@@ -28,7 +29,19 @@ let UserSchema = new Schema(
 			type: String,
 			required: true,
 			minlength: [8, "Password Length minimum 8"]
-		}
+		},
+		comments: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: "Comment"
+			}
+		],
+		threads: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: "Thread"
+			}
+		]
 	},
 	{
 		timestamps: {
@@ -55,21 +68,32 @@ UserSchema.post("save", function(error, doc, next) {
 	}
 });
 
-// UserSchema.pre("remove", function(next) {
-// 	let user = this;
-
-// 	user
-// 		.model("Article")
-// 		.remove({ _id: { $in: user.articles } })
-// 		.then(response => {
-// 			next();
-// 		})
-// 		.catch(err => {
-// 			res.status(400).json({
-// 				message: err.message,
-// 				data: err
-// 			});
-// 		});
-// });
+UserSchema.pre("remove", function(next) {
+	//Pada saat user di remove, remove juga Comment dan Thread yang mereka buat.
+	//Usahakan pakai Doc.Remove biar trigger semua pre hooksnya
+	let user = this;
+	user
+		.model("Thread")
+		.aggregate([{ $match: { user: user._id } }])
+		.then(threadsByUser => {
+			if (threadsByUser.length) {
+				for (let thread of threadsByUser) {
+					thread.remove();
+				}
+			}
+			return user.model("Comment").aggregate([{ $match: { user: user._id } }]);
+		})
+		.then(commentsByUser => {
+			if (commentsByUser.length) {
+				for (let comment of commentsByUser) {
+					comment.remove();
+				}
+			}
+			next();
+		})
+		.catch(err => {
+			responseErrorHandler(err);
+		});
+});
 
 module.exports = mongoose.model("User", UserSchema);
