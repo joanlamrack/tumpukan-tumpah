@@ -12,5 +12,7 @@ router.get("/", function(req, res) {
 
 router.post("/register", UserController.signup);
 router.post("/login", UserController.login);
+router.post("/google-login", UserController.googleSignIn);
+router.post("/forgotpassword", UserController.forgotPassword);
 
 module.exports = router;

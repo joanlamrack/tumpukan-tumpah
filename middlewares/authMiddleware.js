@@ -21,7 +21,7 @@ class AuthMiddleware {
 			User.findById(id)
 				.then(userfound => {
 					if (userfound) {
-						req.headers.userId = userfound._id;
+						req.headers.userId = userfound.id;
 						next();
 					} else {
 						res.status(400).json({
