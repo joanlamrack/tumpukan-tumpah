@@ -7,13 +7,18 @@ let UserSchema = new Schema(
 		name: {
 			type: String,
 			required: true,
-			minlength:1
+			minlength: 1
+		},
+		verified: {
+			type: Boolean,
+			required: true,
+			default: false
 		},
 		email: {
 			type: String,
 			required: true,
 			unique: true,
-			minlength:1,
+			minlength: 1,
 			match: [
 				/^\w+@([a-z]+\.)+[a-z]{2,3}$/,
 				"Please input a valid email format"
@@ -23,13 +28,7 @@ let UserSchema = new Schema(
 			type: String,
 			required: true,
 			minlength: [8, "Password Length minimum 8"]
-		},
-		articles: [
-			{
-				type: Schema.Types.ObjectId,
-				ref: "Article"
-			}
-		]
+		}
 	},
 	{
 		timestamps: {
@@ -56,21 +55,21 @@ UserSchema.post("save", function(error, doc, next) {
 	}
 });
 
-UserSchema.pre("remove", function(next) {
-	let user = this;
+// UserSchema.pre("remove", function(next) {
+// 	let user = this;
 
-	user
-		.model("Article")
-		.remove({ _id: { $in: user.articles } })
-		.then(response => {
-			next();
-		})
-		.catch(err => {
-			res.status(400).json({
-				message: err.message,
-				data: err
-			});
-		});
-});
+// 	user
+// 		.model("Article")
+// 		.remove({ _id: { $in: user.articles } })
+// 		.then(response => {
+// 			next();
+// 		})
+// 		.catch(err => {
+// 			res.status(400).json({
+// 				message: err.message,
+// 				data: err
+// 			});
+// 		});
+// });
 
 module.exports = mongoose.model("User", UserSchema);

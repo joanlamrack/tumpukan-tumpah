@@ -48,9 +48,13 @@ class UserController {
 	}
 
 	static forgotPassword(req,res){
-		
+		//Menerima email, kalau ada dalam database, email link reset password dikirim ke email
 	}
 
+	static googleSignIn(req,res){
+		//Menerima User Name dan email
+		//kalau baru, create random password, kirim lewat email
+	}
 
 }
 

@@ -1,5 +1,5 @@
 {
-  "name": "golb-blog",
+  "name": "tumpukan-tumpah",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -14,17 +14,22 @@
     "cors": "^2.8.4",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
+    "generate-password": "^1.4.0",
     "jsonwebtoken": "^8.3.0",
-    "mongoose": "^5.2.9",
-    "morgan": "^1.9.0"
+    "kue": "^0.11.6",
+    "mongoose": "^5.2.10",
+    "morgan": "^1.9.0",
+    "node-cron": "^1.2.1",
+    "nodemailer": "^4.6.8",
+    "redis-server": "^1.2.2"
   },
   "devDependencies": {
     "mocha": "^5.2.0"
   },
   "scripts": {
     "test": "NODE_ENV=test mocha",
-	"start": "NODE_ENV=production node app.js",
-	"dev": "NODE_ENV=development node app.js"
+    "start": "NODE_ENV=production node app.js",
+    "dev": "NODE_ENV=development node app.js"
   },
   "repository": {
     "type": "git",
