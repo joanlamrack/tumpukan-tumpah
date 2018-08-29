@@ -61,7 +61,7 @@ class UserController {
 
 	static resetPassword(req, res) {
 		User.findOne({
-			_id: ObjectIdHelper.convertStringIntoObjId(req.params.userId)
+			_id: ObjectIdHelper.convertStringIntoObjId(req.headers.userId)
 		})
 			.then(userFound => {
 				if (Object.keys(userFound).length) {
