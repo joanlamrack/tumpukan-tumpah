@@ -96,7 +96,7 @@ class AuthMiddleware {
 								},
 								{
 									comments: ObjectIdHelper.convertStringIntoObjId(
-										req.params.commentsId
+										req.params.commentId
 									)
 								}
 							]

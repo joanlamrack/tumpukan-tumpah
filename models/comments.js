@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const PostModel = require("./posts.js");
-const ObjectIdHelper = require("../helpers/objectIdhelper");
 
 const options = {
 	discriminatorKey: "posttype",
@@ -34,6 +33,15 @@ commentSchema.pre("remove", function(next) {
 		)
 		.then(updateresponse => {
 			console.log(updateresponse);
+			return comment
+				.model("Thread")
+				.findByIdAndUpdate(
+					{ _id: comment.thread },
+					{ $pull: { comments: comment._id } }
+				);
+		})
+		.then(updatecommentresponse => {
+			console.log(updatecommentresponse);
 			next();
 		})
 		.catch(err => {
@@ -46,10 +54,20 @@ commentSchema.pre("save", function(next) {
 	comment
 		.model("User")
 		.findOneAndUpdate(
-			{ _id: ObjectIdHelper.convertStringIntoObjId(comment.user) },
-			{ $push: { comments: comment.id } }
+			{ _id: comment.user },
+			{ $push: { comments: comment._id } }
 		)
 		.then(response => {
+			console.log(response);
+			return comment
+				.model("Thread")
+				.findOneAndUpdate(
+					{ _id: comment.thread },
+					{ $push: { comments: comment._id } }
+				);
+		})
+		.then(ressponse => {
+			console.log(ressponse);
 			next();
 		})
 		.catch(err => {

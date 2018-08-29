@@ -1,13 +1,14 @@
 const Comment = require("../models/comments");
 let { responseErrorHandler } = require("../helpers/errorhandler");
 const ObjectIdHelper = require("../helpers/objectIdhelper");
+const InputHelper = require("../helpers/inputhelper");
 class CommentController {
 	constructor() {}
 
 	static createComment(req, res) {
 		Comment.create({
 			content: req.body.content,
-			Comment: req.query.CommentId,
+			thread: req.query.threadId,
 			user: req.headers.userId
 		})
 			.then(createdUser => {
@@ -38,8 +39,9 @@ class CommentController {
 
 	static getCommentByUserId(req, res) {
 		Comment.find({
-			user: ObjectIdHelper.convertStringIntoObjId(req.header.userId)
+			user: ObjectIdHelper.convertStringIntoObjId(req.headers.userId)
 		})
+
 			.then(commentsByUser => {
 				res.status(200).json(commentsByUser);
 			})
@@ -50,12 +52,12 @@ class CommentController {
 
 	static deleteCommentById(req, res) {
 		Comment.findOne({
-			_id: ObjectIdHelper.convertStringIntoObjId(req.params.threadId)
+			_id: ObjectIdHelper.convertStringIntoObjId(req.params.commentId)
 		})
 			.then(commentFound => {
 				if (Object.keys(commentFound).length) {
 					commentFound.remove(function(err) {
-						console.log(err);
+						// console.log(err);
 						res.status(200).json(commentFound);
 					});
 				} else {
@@ -68,12 +70,16 @@ class CommentController {
 	}
 
 	static patchCommentById(req, res) {
-		Comment.findByIdAndUpdate(req.params.commentId, {
+		let inputArgs = {
 			content: req.body.content
-		})
+		};
+
+		inputArgs = InputHelper.filterObjFalsyField(inputArgs);
+
+		Comment.findByIdAndUpdate(req.params.commentId, inputArgs, { new: true })
 			.then(commentFound => {
-				if (commentFound.length) {
-					res.status(200).json(commentFound[0]);
+				if (Object.keys(commentFound).length) {
+					res.status(200).json(commentFound);
 				} else {
 					res.status(404).json({ error: "not found" });
 				}
@@ -88,6 +94,7 @@ class CommentController {
 			_id: ObjectIdHelper.convertStringIntoObjId(req.params.commentId)
 		})
 			.then(commentToBeUpVoted => {
+				console.log(commentToBeUpVoted)
 				if (
 					Object.keys(commentToBeUpVoted).length &&
 					!commentToBeUpVoted.isAlreadyVoted(req.headers.userId)

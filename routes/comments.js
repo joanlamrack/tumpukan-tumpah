@@ -12,15 +12,22 @@ router
 		CommentController.createComment
 	); // create Comment with threadId on headers, and user token
 
+router.get(
+	"/me",
+	AuthMiddleware.checkifTokenExist,
+	AuthMiddleware.checkifTokenValid,
+	CommentController.getCommentByUserId
+);
+
 router.post(
-	":/commentId/upvote",
+	"/:commentId/upvote",
 	AuthMiddleware.checkifTokenExist,
 	AuthMiddleware.checkifTokenValid,
 	AuthMiddleware.isNotOwnedByUser,
 	CommentController.upvoteCommentById
 ); // upvote a thread, make sure user is logged in and the thread has been not been voted?
 router.post(
-	":/commentId/downvote",
+	"/:commentId/downvote",
 	AuthMiddleware.checkifTokenExist,
 	AuthMiddleware.checkifTokenValid,
 	AuthMiddleware.isNotOwnedByUser,
@@ -35,13 +42,12 @@ router
 		AuthMiddleware.checkifTokenValid,
 		AuthMiddleware.isOwnedByUser,
 		CommentController.patchCommentById
-	); // edit comment with user token
-
-router.get(
-	"/me",
-	AuthMiddleware.checkifTokenExist,
-	AuthMiddleware.checkifTokenValid,
-	CommentController.getCommentByUserId
-);
+	) // edit comment with user token
+	.delete(
+		AuthMiddleware.checkifTokenExist,
+		AuthMiddleware.checkifTokenValid,
+		AuthMiddleware.isOwnedByUser,
+		CommentController.deleteCommentById
+	);
 
 module.exports = router;

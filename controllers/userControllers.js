@@ -2,6 +2,7 @@ const User = require("../models/users");
 const AuthHelper = require("../helpers/authhelper");
 const ObjectIdHelper = require("../helpers/objectIdhelper");
 const PassWordGenerator = require("generate-password");
+const mailModule = require("../libs/mailModule");
 
 class UserController {
 	constructor() {}
@@ -13,6 +14,8 @@ class UserController {
 			password: req.body.password
 		})
 			.then(response => {
+				//send email
+				mailModule(req.body.email, "registered-manual", req.body.name);
 				res.status(201).json(response);
 			})
 			.catch(err => {

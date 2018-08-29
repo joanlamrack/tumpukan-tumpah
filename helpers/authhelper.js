@@ -19,6 +19,10 @@ class AuthHelper {
 	static decodeToken(token) {
 		return jwt.verify(token, process.env.secret);
 	}
+
+	static createBasicAuth(username,password){
+		return "Basic " + new Buffer(username + ":" + password).toString("base64");
+	}
 }
 
 module.exports = AuthHelper;

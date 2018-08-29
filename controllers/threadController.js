@@ -1,6 +1,8 @@
 let Thread = require("../models/threads");
 let { responseErrorHandler } = require("../helpers/errorhandler");
 let ObjectIdHelper = require("../helpers/objectIdhelper");
+let InputHelper = require("../helpers/inputhelper");
+
 class ThreadController {
 	constructor() {}
 
@@ -37,7 +39,9 @@ class ThreadController {
 			.populate("user")
 			.populate({
 				path: "comments",
-				populate: "user"
+				populate:{
+					path:"user"
+				}
 			})
 			.then(threadsFound => {
 				if (Object.keys(threadsFound).length) {
@@ -84,11 +88,15 @@ class ThreadController {
 	}
 
 	static patchThreadById(req, res) {
-		Thread.findByIdAndUpdate(req.params.threadId, {
+		let inputArgs = {
 			title: req.body.title,
 			content: req.body.content,
 			tags: req.body.tags
-		})
+		};
+
+		inputArgs = InputHelper.filterObjFalsyField(inputArgs);
+
+		Thread.findByIdAndUpdate(req.params.threadId, inputArgs, { new: true })
 			.then(updatedThread => {
 				res.status(200).json(updatedThread);
 			})

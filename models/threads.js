@@ -71,8 +71,8 @@ threadSchema.pre("save", function(next) {
 	thread
 		.model("User")
 		.findOneAndUpdate(
-			{ _id: ObjectIdHelper.convertStringIntoObjId(thread.user) },
-			{ $push: { threads: thread.id } }
+			{ _id: thread.user },
+			{ $push: { threads: thread._id } }
 		)
 		.then(response => {
 			next();
