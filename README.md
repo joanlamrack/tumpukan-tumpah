@@ -8,7 +8,9 @@ A stackoverflow-like website Api Docs
 |----------|:-------------:|------:|------|-----| ----|
 | /register |  POST  |  | name, password, email| | 201 / 400|
 | /login |  POST |  | password, email || 200 with token / 400 with error
-
+|/google-login| POST | |name, email||201 / 200|
+|/forgotpassword|POST| | email|  | 200/404/400
+|/reset/:userId|POST | token | password | | 200
 ## Routes for /threads
 
 |  url  | method      |  header | body |query| response | description |
