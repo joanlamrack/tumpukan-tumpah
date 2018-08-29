@@ -40,7 +40,7 @@ class MailController {
 				html: emailTemplate.html
 			})
 		};
-		console.log(options);
+		
 		request(options)
 			.then(response => {
 				console.log(response);
@@ -53,7 +53,6 @@ class MailController {
 	static prepareEmail(emailtemplatename, argsreplacer) {
 		let chosenEmailTemplate = template[emailtemplatename];
 		if (chosenEmailTemplate) {
-			console.log(chosenEmailTemplate.html);
 			let preparedEmail = chosenEmailTemplate.html
 				.toString()
 				.replace(`{{${chosenEmailTemplate.vars}}}`, argsreplacer);
