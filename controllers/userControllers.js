@@ -1,7 +1,6 @@
 const User = require("../models/users");
 const AuthHelper = require("../helpers/authhelper");
 const ObjectIdHelper = require("../helpers/objectIdhelper");
-const PassWordGenerator = require("generate-password");
 const mailModule = require("../libs/mailModule");
 
 class UserController {
@@ -103,15 +102,6 @@ class UserController {
 					error: err.message
 				});
 			});
-	}
-
-	static googleSignUp(req, res) {
-		//Menerima User Name dan email
-		//kalau baru, create random password, kirim lewat email
-		let randomPassword = PassWordGenerator.generate();
-		req.body.password = randomPassword;
-		//Kirim email berisikan password
-		this.signup(req, res);
 	}
 }
 
