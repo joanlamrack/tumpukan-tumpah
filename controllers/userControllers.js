@@ -15,10 +15,11 @@ class UserController {
 		})
 			.then(response => {
 				//send email
-				mailModule(req.body.email, "registered-manual", req.body.name);
+
 				res.status(201).json(response);
 			})
 			.catch(err => {
+				console.log(err)
 				res.status(400).json({
 					error: err.message
 				});
@@ -58,8 +59,50 @@ class UserController {
 			});
 	}
 
+	static resetPassword(req, res) {
+		User.findOne({
+			_id: ObjectIdHelper.convertStringIntoObjId(req.params.userId)
+		})
+			.then(userFound => {
+				if (Object.keys(userFound).length) {
+					//kirim email dengan link reset
+					userFound.password = req.body.password;
+					userFound.save();
+				} else {
+					res.status(404).json({
+						error: "not found"
+					});
+				}
+			})
+			.catch(err => {
+				res.status(400).json({
+					error: err.message
+				});
+			});
+	}
+
 	static forgotPassword(req, res) {
 		//Menerima email, kalau ada dalam database, email link reset password dikirim ke email
+		User.findOne({ email: req.body.email })
+			.then(userFound => {
+				if (Object.keys(userFound).length) {
+					//kirim email dengan link reset
+					mailModule(
+						userFound.email,
+						"alert-reset-password",
+						`${process.env.BASE_URL}/reset/${userFound._id}`
+					);
+				} else {
+					res.status(404).json({
+						error: "not found"
+					});
+				}
+			})
+			.catch(err => {
+				res.status(400).json({
+					error: err.message
+				});
+			});
 	}
 
 	static googleSignUp(req, res) {

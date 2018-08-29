@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Authhelper = require("../helpers/authhelper");
 const { responseErrorHandler } = require("../helpers/errorhandler.js");
+const mailModule = require("../libs/mailModule");
+var CronJob = require("cron").CronJob;
+var kue = require("kue"),
+	queue = kue.createQueue();
 
 let UserSchema = new Schema(
 	{
@@ -58,6 +62,48 @@ UserSchema.pre("save", function(next) {
 		user.password = password;
 	}
 	next();
+});
+
+UserSchema.post("save", function(doc) {
+	console.log("Entering post save");
+
+	var today = new Date();
+	var mnt = today.getMinutes() + 1;
+	var hours = today.getHours();
+	var dd = today.getDate();
+	var mm = today.getMonth();
+
+	var schedule = `${mnt} ${hours} ${dd} ${mm} *`;
+
+	console.log(schedule);
+	
+	new CronJob(
+		schedule,
+		function() {
+			var job = queue
+				.create("email", {
+					title: "welcome email for tj",
+					to: "tj@learnboost.com",
+					template: "welcome-email"
+				})
+				.save(function(err) {
+					if (!err) {
+						console.log("sent email");
+					} else {
+						console.log(err);
+					}
+				});
+		},
+		null,
+		true,
+		"Asia/Jakarta"
+	);
+
+	queue.process("email", function(job, done) {
+		mailModule.createAndSendEmail(doc.email, "registered-manual", doc.name, done);
+		
+	});
+
 });
 
 UserSchema.post("save", function(error, doc, next) {

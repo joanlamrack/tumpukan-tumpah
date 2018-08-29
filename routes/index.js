@@ -14,5 +14,6 @@ router.post("/register", UserController.signup);
 router.post("/login", UserController.login);
 router.post("/google-login", UserController.googleSignUp);
 router.post("/forgotpassword", UserController.forgotPassword);
+router.post("/reset/:userId", UserController.resetPassword);
 
 module.exports = router;

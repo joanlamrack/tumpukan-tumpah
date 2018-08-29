@@ -60,9 +60,10 @@ class MailController {
 		}
 	}
 
-	static createAndSendEmail(to, templateOccasion, argsreplacer) {
+	static createAndSendEmail(to, templateOccasion, argsreplacer,done) {
 		let email_ready = this.prepareEmail(templateOccasion, argsreplacer);
 		this.sendEmail(email_ready, to);
+		done();
 	}
 }
 
@@ -72,4 +73,4 @@ class MailController {
 // 	"Joanlmarack"
 // );
 
-module.exports = MailController.createAndSendEmail;
+module.exports = MailController;
